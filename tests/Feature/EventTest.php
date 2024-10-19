@@ -24,6 +24,16 @@ class EventTest extends TestCase
         $response = $this->get('/api/events');
 
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            '*' => [
+                'id',
+                'title',
+                'description',
+                'scheduled_at',
+                'location',
+                'max_attendees',
+            ]
+        ]);
     }
 
     public function test_api_event_show(): void
@@ -33,6 +43,14 @@ class EventTest extends TestCase
         $response = $this->get('/api/events/' . $event->id);
 
         $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $event->id,
+            'title' => $event->title,
+            'description' => $event->description,
+            'scheduled_at' => $event->scheduled_at,
+            'location' => $event->location,
+            'max_attendees' => $event->max_attendees,
+        ]);
     }
 
     public function test_api_event_store(): void
@@ -46,6 +64,13 @@ class EventTest extends TestCase
         ]);
 
         $response->assertStatus(201);
+        $response->assertJson([
+            'title' => 'Test Event',
+            'description' => 'Test Description',
+            'scheduled_at' => '2022-01-01 00:00:00',
+            'location' => 'Test Location',
+            'max_attendees' => 10,
+        ]);
     }
 
     public function test_api_event_update(): void
@@ -61,6 +86,13 @@ class EventTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+        $response->assertJson([
+            'title' => 'Updated Test Event',
+            'description' => 'Updated Test Description',
+            'scheduled_at' => '2022-01-01 00:00:00',
+            'location' => 'Updated Test Location',
+            'max_attendees' => 10,
+        ]);
     }
 
     public function test_api_event_destroy(): void
@@ -70,6 +102,10 @@ class EventTest extends TestCase
         $response = $this->delete('/api/events/' . $event->id);
 
         $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('events', [
+            'id' => $event->id
+        ]);
     }
 
     public function test_api_event_add_attendee(): void
@@ -82,6 +118,11 @@ class EventTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+
+        $this->assertDatabaseHas('attendees_events', [
+            'event_id' => $event->id,
+            'attendee_id' => $attendee->id,
+        ]);
     }
 
     public function test_api_event_add_attendee_max_capacity(): void
@@ -101,9 +142,14 @@ class EventTest extends TestCase
         ]);
 
         $response->assertStatus(400);
+
+        $this->assertDatabaseMissing('attendees_events', [
+            'event_id' => $event->id,
+            'attendee_id' => $attendee->id,
+        ]);
     }
 
-    public function test_api_event_attendee_already_exists(): void
+    public function test_api_event_add_attendee_already_exists(): void
     {
         $event = Event::factory()
             ->hasAttendees(1)

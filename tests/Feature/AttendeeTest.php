@@ -23,6 +23,14 @@ class AttendeeTest extends TestCase
         $response = $this->get('/api/attendees');
 
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            '*' => [
+                'id',
+                'firstname',
+                'lastname',
+                'email'
+            ]
+        ]);
     }
 
     public function test_api_attendee_show(): void 
@@ -32,6 +40,12 @@ class AttendeeTest extends TestCase
         $response = $this->get('/api/attendees/' . $attendee->id);
 
         $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $attendee->id,
+            'firstname' => $attendee->firstname,
+            'lastname' => $attendee->lastname,
+            'email' => $attendee->email
+        ]);
     }
 
     public function test_api_attendee_store(): void 
@@ -43,6 +57,11 @@ class AttendeeTest extends TestCase
         ]);
 
         $response->assertStatus(201);
+        $response->assertJson([
+            'firstname' => 'MyAttendee',
+            'lastname' => 'Surname',
+            'email' => 'test@email.com'
+        ]);
     }
 
     public function test_api_attendee_update(): void 
@@ -56,6 +75,11 @@ class AttendeeTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+        $response->assertJson([
+            'firstname' => 'Updated Firstname',
+            'lastname' => 'Updated Lastname',
+            'email' => 'testupdate@email.com'
+        ]);
     }
 
     public function test_api_attendee_destroy(): void 
@@ -65,6 +89,10 @@ class AttendeeTest extends TestCase
         $response = $this->delete('/api/attendees/' . $attendee->id);
 
         $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('attendees', [
+            'id' => $attendee->id
+        ]);
     }
 
     public function tearDown(): void
