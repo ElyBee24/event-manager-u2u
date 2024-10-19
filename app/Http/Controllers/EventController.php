@@ -86,7 +86,7 @@ class EventController extends Controller
         $attendee = Attendee::findOrFail($request->get('attendee_id'));
 
         if ($event->attendees->contains($attendee)) {
-            return response()->json(['message' => 'Attendee is already part of event'], 400);
+            return response()->json(['message' => 'Attendee is already part of the event'], 400);
         }
 
         if ($event->attendees_count >= $event->max_attendees) {
