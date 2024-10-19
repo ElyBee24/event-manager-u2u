@@ -66,4 +66,10 @@ class AttendeeTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function tearDown(): void
+    {
+        Attendee::query()->delete();
+        parent::tearDown();
+    }
 }

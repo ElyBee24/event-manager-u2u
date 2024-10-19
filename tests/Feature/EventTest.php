@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Attendee;
 use App\Models\Event;
 use Tests\TestCase;
 
@@ -71,9 +72,56 @@ class EventTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_api_event_add_attendee(): void
+    {
+        $event = Event::first();
+        $attendee = Attendee::factory()->create();
+
+        $response = $this->post('/api/events/' . $event->id . '/add-attendee', [
+            'attendee_id' => $attendee->id,
+        ]);
+
+        $response->assertStatus(200);
+    }
+
+    public function test_api_event_add_attendee_max_capacity(): void
+    {
+        $attendeeLimit = 10;
+
+        $event = Event::factory()
+            ->hasAttendees($attendeeLimit)
+            ->create([
+                'max_attendees' => $attendeeLimit,
+            ]);
+
+        $attendee = Attendee::factory()->create();
+
+        $response = $this->post('/api/events/' . $event->id . '/add-attendee', [
+            'attendee_id' => $attendee->id,
+        ]);
+
+        $response->assertStatus(400);
+    }
+
+    public function test_api_event_attendee_already_exists(): void
+    {
+        $event = Event::factory()
+            ->hasAttendees(1)
+            ->create();
+
+        $attendee = $event->attendees->first();
+
+        $response = $this->post('/api/events/' . $event->id . '/add-attendee', [
+            'attendee_id' => $attendee->id,
+        ]);
+
+        $response->assertStatus(400);
+    }
+
 
     public function tearDown(): void
     {
+        Attendee::query()->delete();
         Event::query()->delete();
         parent::tearDown();
     }
