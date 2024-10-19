@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Attendee;
-
+use Illuminate\Support\Facades\Validator;
 class AttendeeController extends Controller
 {
     public function index()
@@ -23,7 +23,15 @@ class AttendeeController extends Controller
 
     public function store(Request $request)
     {
-        // $request parameters should have been validated
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
         return Attendee::create([
             'firstname' => $request->get('firstname'),
@@ -34,7 +42,15 @@ class AttendeeController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $request parameters should have been validated
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
         $attendee = Attendee::findOrFail($id);
 

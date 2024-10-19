@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Attendee;
+use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
@@ -24,7 +25,17 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-        // $request parameters should have been validated
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'description' => 'string',
+            'scheduled_at' => 'required|date',
+            'location' => 'required|string',
+            'max_attendees' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
         return Event::create([
             'title' => $request->get('title'),
@@ -37,7 +48,17 @@ class EventController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $request parameters should have been validated
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'description' => 'string',
+            'scheduled_at' => 'required|date',
+            'location' => 'required|string',
+            'max_attendees' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
         $event = Event::findOrFail($id);
 
